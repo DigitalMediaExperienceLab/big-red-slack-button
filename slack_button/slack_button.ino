@@ -1,97 +1,129 @@
-#include <ESP8266WiFi.h>
-#include <Bounce2.h>
+#include <SPI.h>
+#include <Ethernet.h>
 
-const char BUTTON_PIN = 0;
-#define SSID "Your Wi-Fi Router SSID"
-#define PASSWORD "YOUR_WIFI_PASSWORD"
-#define HOST "hooks.slack.com"
-#define URL "/services/AAAAAA/BBBBBB/CCCCCCCCCC"
-String MESSAGE = "Someone pushed the big red button.";
+//button variables
+const char buttonPin = 2; //NEED TO EDIT THIS
+boolean buttonState;
 
-Bounce button = Bounce();
+//networking settings, incuding Ethernet Sheild MAC 
+byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; //NEED TO EDIT THIS
+EthernetClient client;
+
+//slack-specific settings
+#define server "hooks.slack.com"
+#define urlPath "/services/AAAAAA/BBBBBB/CCCCCCCCCC" //NEED TO EDIT THIS
+String message = "Someone pushed the big red button."; //NEED TO EDIT THIS
 
 void setup() {
-  Serial.begin(115200);
-  Serial.println();
+  //init button pin
+  pinMode(buttonPin, INPUT_PULLUP);
 
-  WiFi.mode(WIFI_STA);
-  WiFi.begin(SSID, PASSWORD);
-  Serial.print("Connecting to wifi...");
+  //begin debug serial
+  Serial.begin(9600);
 
-  while (WiFi.status() != WL_CONNECTED) {
-    Serial.print(".");
-    delay(250);
+  //connect to network
+  if (Ethernet.begin(mac) == 0) {
+    Serial.println(F("Failed to configure Ethernet using DHCP"));
+    while(true){} //failed, so do nothing forever
   }
+  delay(1000);
 
-  Serial.println();
-  Serial.println(WiFi.localIP());
-
-  button.attach(BUTTON_PIN);
-  button.interval(5);
-  pinMode(BUTTON_PIN, INPUT);
-}
-
-void loop() {
-  if (button.update()) { 
-    if (button.fell()) {
-      post();
-    }
+  //get initial state of button
+  if(digitalRead(buttonPin) == HIGH)
+  {
+    buttonState = true;
+  }
+  else
+  {
+    buttonState = false;
   }
 }
 
+void loop()
+{
+  //check if button was just pushed
+  if(buttonState == false && digitalRead(buttonPin) == HIGH)
+  {
+    Serial.println(F("Button was pressed."));
+    post();
+  }
+
+  //update button state
+  if(digitalRead(buttonPin) == HIGH)
+  {
+    buttonState = true;
+  }
+  else
+  {
+    buttonState = false;
+  }
+}
+
+//function for posting message
 void post() {
-  Serial.println("Connecting to host...");
-  WiFiClientSecure client;
-  if (!client.connect(HOST, 443)) {
-    Serial.println("Connection failed");
+  //connect to server
+  Serial.println(F("Connecting to server..."));
+  if(!client.connect(server, 443))
+  {
+    Serial.println(F("Connection failed"));
     client.stop();
     return;
   }
-  Serial.println("Connected to host");
+  Serial.println(F("Connected to server"));
 
   // Send a POST request to your Slack webhook:
   // {"text": "Someone pushed the big red button."}
 
+  //compose message
   String request = "";
-  request += "POST ";
-  request += URL;
-  request += " HTTP/1.1\r\n";
+  request += F("POST ");
+  request += urlPath;
+  request += F(" HTTP/1.1\r\n");
 
-  request += "Host: ";
-  request += HOST;
-  request += "\r\n";
+  request += F("server: ");
+  request += server;
+  request += F("\r\n");
 
-  int len = MESSAGE.length() + 12;  // JSON wrapper length
-  request += "Content-Length: ";
+  int len = message.length() + 12;  // JSON wrapper length
+  request += F("Content-Length: ");
   request += len;
-  request += "\r\n";
+  request += F("\r\n");
 
-  request += "Accept: application/json\r\n";
-  request += "Connection: close\r\n";
-  request += "Content-Type: application/json\r\n";
+  request += F("Accept: application/json\r\n");
+  request += F("Connection: close\r\n");
+  request += F("Content-Type: application/json\r\n");
 
-  request += "\r\n";
+  request += F("\r\n");
   
-  request += "{\"text\": \"";
-  request += MESSAGE;
-  request += "\"}";
+  request += F("{\"text\": \"");
+  request += message;
+  request += F("\"}");
 
+  //send message to debug and server
   Serial.print(request);
   Serial.println();
   client.print(request);
 
+  //wait for disconnect or timout (end connection either way)
   long timeout = millis() + 5000;
-  while (!client.available()) {
-    if (millis() > timeout) {
-      Serial.println("Request timed out");
+  while (!client.available())
+  {
+    if (millis() > timeout)
+    {
+      Serial.println(F("Request timed out"));
       client.stop();
       return;
     }
   }
-  Serial.println("Response:");
-  while (client.available()) {
+
+  //print any response from server to debug
+  Serial.println(F("Response:"));
+  while (client.available())
+  {
     Serial.write(client.read());
   }
   Serial.println();
-  Serial.println("Request complete");
+
+  //end of request
+  Serial.println(F("Request complete"));
 }
