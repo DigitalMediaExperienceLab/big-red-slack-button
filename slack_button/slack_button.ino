@@ -6,7 +6,7 @@ const char buttonPin = 2; //NEED TO EDIT THIS
 boolean buttonState;
 
 //networking settings, incuding Ethernet Sheild MAC 
-byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED }; //NEED TO EDIT THIS
+byte mac[] = { 0x68, 0x8F, 0xC7, 0x18, 0x35, 0xF4 }; //Edited: Double-check whe you get the chance
 EthernetClient client;
 
 //slack-specific settings
