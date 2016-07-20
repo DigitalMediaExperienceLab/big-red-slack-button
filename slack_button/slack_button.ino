@@ -13,12 +13,12 @@ EthernetClient client;
 #define server "hooks.slack.com"
 #define urlPath "/services/AAAAAA/BBBBBB/CCCCCCCCCC" //NEED TO EDIT THIS
 String message = "Someone pushed the big red button."; //NEED TO EDIT THIS
-//byte mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //NEED TO EDIT THIS
+byte mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //NEED TO EDIT THIS
 EthernetClient client;
 
 //slack-specific settings
 #define server "http://hooks.slack.com"
-//#define urlPath "/services/AAAAAA/BBBBBB/CCCCCCCCCC" //NEED TO EDIT THIS
+#define urlPath "/services/AAAAAA/BBBBBB/CCCCCCCCCC" //NEED TO EDIT THIS
 String message = "Arduino copying Postman exactly works."; //NEED TO EDIT THIS
 
 void setup() {
