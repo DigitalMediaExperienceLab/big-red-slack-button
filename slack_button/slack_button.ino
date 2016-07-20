@@ -19,7 +19,6 @@ EthernetClient client;
 //slack-specific settings
 #define server "http://hooks.slack.com"
 #define urlPath "/services/AAAAAA/BBBBBB/CCCCCCCCCC" //NEED TO EDIT THIS
-String message = "Arduino copying Postman exactly works."; //NEED TO EDIT THIS
 
 void setup() {
   //init button pin
