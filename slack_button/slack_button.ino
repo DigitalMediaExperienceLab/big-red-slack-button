@@ -13,6 +13,13 @@ EthernetClient client;
 #define server "hooks.slack.com"
 #define urlPath "/services/AAAAAA/BBBBBB/CCCCCCCCCC" //NEED TO EDIT THIS
 String message = "Someone pushed the big red button."; //NEED TO EDIT THIS
+//byte mac[] = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }; //NEED TO EDIT THIS
+EthernetClient client;
+
+//slack-specific settings
+#define server "http://hooks.slack.com"
+//#define urlPath "/services/AAAAAA/BBBBBB/CCCCCCCCCC" //NEED TO EDIT THIS
+String message = "Arduino copying Postman exactly works."; //NEED TO EDIT THIS
 
 void setup() {
   //init button pin
@@ -94,6 +101,51 @@ void post() {
   request += F("Content-Type: application/json\r\n");
 
   request += F("\r\n");
+  Serial.print(F("POST "));
+  //Serial.print(server);
+  Serial.print(F(urlPath));
+  Serial.print(F(" HTTP/1.1\r\n"));
+  client.print(F("POST "));
+  //client.print(server);
+  client.print(F(urlPath));
+  client.print(F(" HTTP/1.1\r\n"));
+
+  Serial.print(F("Host: "));
+  Serial.print(F(server));
+  Serial.print(F("\r\n"));
+  client.print(F("Host: "));
+  client.print(F(server));
+  client.print(F("\r\n"));
+
+  //int len = message.length() + 12;  // JSON wrapper length
+  //Serial.print(F("Content-Length: "));
+  //Serial.print(len);
+  //Serial.print(F("\r\n"));
+  //client.print(F("Content-Length: "));
+  //client.print(len);
+  //client.print(F("\r\n"));
+
+  //Serial.print(F("Accept: application/json\r\n"));
+  //Serial.print(F("Connection: close\r\n"));
+  //Serial.print(F("Content-Type: application/json\r\n"));
+  //client.print(F("Accept: application/json\r\n"));
+  //client.print(F("Connection: close\r\n"));
+  //client.print(F("Content-Type: application/json\r\n"));
+
+  Serial.print(F("Cache-Control: no-cache\r\n"));
+  client.print(F("Cache-Control: no-cache\r\n"));
+  Serial.print(F("Postman-Token: bed00753-d001-5a50-5440-743f7b43fbcb\r\n"));
+  client.print(F("Postman-Token: bed00753-d001-5a50-5440-743f7b43fbcb\r\n"));
+
+  Serial.print(F("\r\n"));
+  client.print(F("\r\n"));
+  
+  Serial.print(F("{\"text\": \""));
+  Serial.print(message);
+  Serial.print(F("\"}"));
+  client.print(F("{\"text\": \""));
+  client.print(message);
+  client.print(F("\"}"));
   
   request += F("{\"text\": \"");
   request += message;
