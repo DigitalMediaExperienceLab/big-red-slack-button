@@ -1,6 +1,8 @@
 #include <SPI.h>
 #include <Ethernet.h>
 
+//poop
+
 //button variables
 const char buttonPin = 2; //NEED TO EDIT THIS
 boolean buttonState;
